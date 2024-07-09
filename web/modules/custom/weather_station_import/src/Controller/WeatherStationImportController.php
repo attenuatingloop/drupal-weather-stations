@@ -19,6 +19,7 @@ class WeatherStationImportController extends ControllerBase {
 
       // Check if a node with the same Station Identifier already exists.
       $query = \Drupal::entityQuery('node')
+        ->accessCheck(TRUE)
         ->condition('type', 'weather_station')
         ->condition('field_station_identifier', $properties['stationIdentifier']);
       $nids = $query->execute();
@@ -27,11 +28,13 @@ class WeatherStationImportController extends ControllerBase {
         // Node exists, update the existing node.
         $node = Node::load(reset($nids));
         $node->setTitle($properties['name']);
+        $node->set('field_station_identifier', $properties['stationIdentifier']);
         $node->set('field_gps_coordinates', [
           'lat' => $coordinates[1],
           'lng' => $coordinates[0],
         ]);
         $node->set('field_altitude', $properties['elevation']['value']);
+        $node->set('field_timezone', $properties['timeZone']);
       } else {
         // Node does not exist, create a new one.
         $node = Node::create([
@@ -43,6 +46,7 @@ class WeatherStationImportController extends ControllerBase {
             'lng' => $coordinates[0],
           ],
           'field_altitude' => $properties['elevation']['value'],
+          'field_timezone' => $properties['timeZone'],
         ]);
       }
 
