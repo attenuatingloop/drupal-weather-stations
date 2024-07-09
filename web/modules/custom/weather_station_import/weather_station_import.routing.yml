@@ -1,0 +1,7 @@
+weather_station_import.import:
+  path: '/admin/content/weather-station-import'
+  defaults:
+    _controller: '\Drupal\weather_station_import\Controller\WeatherStationImportController::importStations'
+    _title: 'Import Weather Stations'
+  requirements:
+    _permission: 'administer nodes'

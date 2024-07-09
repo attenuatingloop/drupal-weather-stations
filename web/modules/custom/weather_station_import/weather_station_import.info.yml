@@ -1,0 +1,9 @@
+name: 'Weather Station Import'
+type: module
+description: 'Imports weather station data from the Weather API and creates nodes.'
+core_version_requirement: ^8 || ^9 || ^10 || ^11
+package: Custom
+dependencies:
+  - drupal:node
+  - drupal:geolocation
+  - drupal:layout_builder

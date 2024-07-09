@@ -1,0 +1,86 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function weather_station_import_install() {
+  // Ensure the Weather Station content type is created.
+  _weather_station_import_create_weather_station_content_type();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function weather_station_import_uninstall() {
+  // Optionally delete the Weather Station content type when the module is uninstalled.
+  if ($type = \Drupal::entityTypeManager()->getStorage('node_type')->load('weather_station')) {
+    $type->delete();
+  }
+}
+
+/**
+ * Helper function to create the Weather Station content type.
+ */
+function _weather_station_import_create_weather_station_content_type() {
+  $content_type = 'weather_station';
+  
+  // Check if the content type already exists.
+  $type = \Drupal::entityTypeManager()->getStorage('node_type')->load($content_type);
+  if (!$type) {
+    // Create the content type.
+    $type = \Drupal\node\Entity\NodeType::create([
+      'type' => $content_type,
+      'name' => 'Weather Station',
+    ]);
+    $type->save();
+
+    // Add fields to the content type.
+    _weather_station_import_add_fields($content_type);
+  }
+}
+
+/**
+ * Helper function to add fields to the Weather Station content type.
+ */
+function _weather_station_import_add_fields($content_type) {
+  $fields = [
+    'field_station_identifier' => [
+      'type' => 'string',
+      'label' => 'Station Identifier',
+      'settings' => ['max_length' => 255],
+    ],
+    'field_gps_coordinates' => [
+      'type' => 'geolocation',
+      'label' => 'GPS Coordinates',
+    ],
+    'field_altitude' => [
+      'type' => 'float',
+      'label' => 'Altitude',
+    ],
+  ];
+
+  foreach ($fields as $field_name => $field_info) {
+    // Check if the field already exists.
+    $field = \Drupal::entityTypeManager()->getStorage('field_storage_config')->load('node.' . $field_name);
+    if (!$field) {
+      // Create the field storage.
+      $field_storage = \Drupal\field\Entity\FieldStorageConfig::create([
+        'field_name' => $field_name,
+        'entity_type' => 'node',
+        'type' => $field_info['type'],
+        'settings' => isset($field_info['settings']) ? $field_info['settings'] : [],
+      ]);
+      $field_storage->save();
+
+      // Create the field instance.
+      $field_instance = \Drupal\field\Entity\FieldConfig::create([
+        'field_name' => $field_name,
+        'entity_type' => 'node',
+        'bundle' => $content_type,
+        'label' => $field_info['label'],
+        'settings' => isset($field_info['settings']) ? $field_info['settings'] : [],
+      ]);
+      $field_instance->save();
+    }
+  }
+}

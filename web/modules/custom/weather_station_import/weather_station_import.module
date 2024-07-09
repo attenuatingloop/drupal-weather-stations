@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * Contains the main module file for the Weather Station Import module.
+ */
+
+/**
+ * Implements hook_help().
+ * Provide module documentation.
+ */
+function weather_station_import_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.weather_station_import':
+      return '<p>' . t('The Weather Station Import module imports weather station data from the Weather API and creates nodes of the Weather Station content type.') . '</p>';
+  }
+}
+
+/**
+ * Implements hook_requirements().
+ * Provides information to the site status report.
+ */
+function weather_station_import_requirements($phase) {
+  $requirements = [];
+  if ($phase === 'runtime') {
+    $requirements['weather_station_import'] = [
+      'title' => t('Weather Station Import'),
+      'value' => t('Enabled'),
+      'description' => t('Imports weather station data from the Weather API and creates nodes.'),
+    ];
+  }
+  return $requirements;
+}
