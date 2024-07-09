@@ -1,4 +1,7 @@
 Drupal module to display weather station data
 
-TODO: Weatherstations are sorted by title rather than proximity to user. 
+Using ddev for local development with sitename 'weather'.
+Accessible from the following URL: http://weather.ddev.site/weather-stations
+
+Known issues: Weatherstations are sorted by title rather than proximity to user. 
 
