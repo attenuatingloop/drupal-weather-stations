@@ -16,23 +16,42 @@ class WeatherStationImportController extends ControllerBase {
     foreach ($data['features'] as $station) {
       $properties = $station['properties'];
       $coordinates = $station['geometry']['coordinates'];
-      echo 'coordinates: ' . $coordinates[1] . ', ' . $coordinates[0] . '<br>';
-      $node = Node::create([
-        'type' => 'weather_station',
-        'title' => $properties['name'],
-        'field_station_identifier' => $properties['stationIdentifier'],
-        'field_gps_coordinates' => [
+
+      // Check if a node with the same Station Identifier already exists.
+      $query = \Drupal::entityQuery('node')
+        ->condition('type', 'weather_station')
+        ->condition('field_station_identifier', $properties['stationIdentifier']);
+      $nids = $query->execute();
+
+      if (!empty($nids)) {
+        // Node exists, update the existing node.
+        $node = Node::load(reset($nids));
+        $node->setTitle($properties['name']);
+        $node->set('field_gps_coordinates', [
           'lat' => $coordinates[1],
           'lng' => $coordinates[0],
-        ],
-        'field_altitude' => $properties['elevation']['value'],
-      ]);
+        ]);
+        $node->set('field_altitude', $properties['elevation']['value']);
+      } else {
+        // Node does not exist, create a new one.
+        $node = Node::create([
+          'type' => 'weather_station',
+          'title' => $properties['name'],
+          'field_station_identifier' => $properties['stationIdentifier'],
+          'field_gps_coordinates' => [
+            'lat' => $coordinates[1],
+            'lng' => $coordinates[0],
+          ],
+          'field_altitude' => $properties['elevation']['value'],
+        ]);
+      }
+
       $node->save();
     }
 
     return [
       '#type' => 'markup',
-      '#markup' => $this->t('Weather stations imported successfully.'),
+      '#markup' => $this->t('Weather stations imported/reimported successfully.'),
     ];
   }
 }
